@@ -1,0 +1,9 @@
+{
+  "name": "tech-dept-manager",
+  "version": "1.0.0",
+  "private": true,
+  "description": "เว็บบริหารจัดการแผนก Tech — zero dependency",
+  "scripts": {
+    "start": "node server.js"
+  }
+}

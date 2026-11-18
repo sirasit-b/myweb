@@ -1,0 +1,73 @@
+{
+  "members": [
+    {
+      "id": "7e690c99",
+      "name": "Somchai",
+      "role": "Backend Developer",
+      "email": "",
+      "createdAt": 1794964855892
+    },
+    {
+      "id": "c0652f94",
+      "name": "Nida",
+      "role": "Frontend Developer",
+      "email": "",
+      "createdAt": 1794964855892
+    },
+    {
+      "id": "347463ba",
+      "name": "Arthit",
+      "role": "DevOps",
+      "email": "",
+      "createdAt": 1794964855892
+    }
+  ],
+  "projects": [
+    {
+      "id": "58adc872",
+      "name": "Website",
+      "status": "active",
+      "description": "Company website revamp",
+      "createdAt": 1794964855892
+    },
+    {
+      "id": "90cec466",
+      "name": "Infra",
+      "status": "active",
+      "description": "Servers & CI/CD",
+      "createdAt": 1794964855892
+    }
+  ],
+  "tasks": [
+    {
+      "id": "1d0cf810",
+      "title": "Fix login bug",
+      "status": "todo",
+      "priority": "high",
+      "assigneeId": "7e690c99",
+      "projectId": "58adc872",
+      "due": "",
+      "createdAt": 1794964855892
+    },
+    {
+      "id": "d0c9d098",
+      "title": "Design new dashboard",
+      "status": "doing",
+      "priority": "medium",
+      "assigneeId": "c0652f94",
+      "projectId": "58adc872",
+      "due": "",
+      "createdAt": 1794964855892
+    },
+    {
+      "id": "02e3c8a5",
+      "title": "Renew SSL certificate",
+      "status": "done",
+      "priority": "low",
+      "assigneeId": "347463ba",
+      "projectId": "90cec466",
+      "due": "",
+      "createdAt": 1794964855892
+    }
+  ]
+}

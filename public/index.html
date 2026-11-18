@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tech Dept</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fafafa; --panel:#fff; --text:#18181b; --muted:#71717a; --line:#e4e4e7; --hover:#f4f4f5;
+  --accent:#2563eb; --accent-soft:#eff6ff;
+  --high:#dc2626; --med:#d97706; --low:#16a34a;
+  --radius:10px; --shadow:0 10px 40px rgba(0,0,0,.12);
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#0b0b0d; --panel:#141417; --text:#f4f4f5; --muted:#a1a1aa; --line:#27272a; --hover:#1c1c20;
+    --accent:#60a5fa; --accent-soft:#172033; --shadow:0 10px 40px rgba(0,0,0,.5); }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 "IBM Plex Sans Thai",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+kbd{font:12px ui-monospace,monospace;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 6px;background:var(--panel);color:var(--muted)}
+
+/* layout */
+.app{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+aside{border-right:1px solid var(--line);padding:20px 12px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:4px}
+.brand{font-weight:600;padding:4px 10px 18px;display:flex;align-items:center;gap:8px}
+.brand i{width:22px;height:22px;border-radius:6px;background:var(--text);display:inline-block}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:8px;color:var(--muted);cursor:pointer;border:0;background:none;text-align:left;width:100%}
+.nav:hover{background:var(--hover);color:var(--text)}
+.nav.active{background:var(--hover);color:var(--text);font-weight:500}
+.nav kbd{font-size:11px}
+.side-foot{margin-top:auto;padding:10px;font-size:13px;color:var(--muted)}
+.capture-btn{margin:0 0 14px;display:flex;justify-content:space-between;align-items:center;padding:9px 12px;border-radius:8px;border:1px solid var(--line);background:var(--panel);cursor:pointer}
+.capture-btn:hover{border-color:var(--muted)}
+
+main{padding:28px 36px;max-width:1200px;width:100%}
+header.page{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:24px;flex-wrap:wrap}
+h1{font-size:22px;font-weight:600;margin:0}
+.sub{color:var(--muted);font-size:14px}
+.btn{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:7px 14px;cursor:pointer}
+.btn:hover{background:var(--hover)}
+.btn.primary{background:var(--text);color:var(--bg);border-color:var(--text)}
+.btn.primary:hover{opacity:.88}
+.search{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:7px 12px;width:240px;outline:none}
+.search:focus{border-color:var(--accent)}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+.stat b{display:block;font-size:26px;font-weight:600}
+.stat span{color:var(--muted);font-size:13px}
+.section-title{font-size:14px;font-weight:500;color:var(--muted);margin:0 0 10px}
+
+/* board */
+.board{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;align-items:start}
+.col{background:var(--hover);border-radius:var(--radius);padding:10px;min-height:120px}
+.col.drop{outline:2px dashed var(--accent);outline-offset:-2px}
+.col h3{font-size:13px;font-weight:500;color:var(--muted);margin:2px 4px 10px;display:flex;justify-content:space-between}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:8px;cursor:grab;position:relative}
+.card:hover{border-color:var(--muted)}
+.card .t{font-weight:500;padding-right:22px;word-break:break-word}
+.card.done .t{text-decoration:line-through;color:var(--muted)}
+.meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;font-size:12px;color:var(--muted);align-items:center}
+.chip{border:1px solid var(--line);border-radius:999px;padding:0 8px;line-height:20px;white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.p-high{background:var(--high)}.p-medium{background:var(--med)}.p-low{background:var(--low)}
+.x{position:absolute;top:6px;right:6px;border:0;background:none;color:var(--muted);cursor:pointer;opacity:0;font-size:16px;line-height:1;padding:2px 5px;border-radius:4px}
+.card:hover .x,.row:hover .x{opacity:1}
+.x:hover{background:var(--hover);color:var(--high)}
+
+/* list */
+.list{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+.row{display:flex;align-items:center;gap:14px;padding:12px 16px;border-top:1px solid var(--line);position:relative;cursor:pointer}
+.row:first-child{border-top:0}
+.row:hover{background:var(--hover)}
+.row .x{position:static}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:600;flex:none}
+.grow{flex:1;min-width:0}
+.grow .muted{color:var(--muted);font-size:13px}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+.bar{height:6px;border-radius:9px;background:var(--hover);overflow:hidden;width:120px}
+.bar i{display:block;height:100%;background:var(--accent)}
+
+/* modal */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:flex-start;justify-content:center;padding-top:14vh;z-index:50;backdrop-filter:blur(2px)}
+.overlay.open{display:flex}
+.modal{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);width:min(600px,calc(100% - 32px));overflow:hidden;animation:pop .14s ease-out}
+@keyframes pop{from{transform:translateY(-6px) scale(.98);opacity:0}}
+.qc-input{width:100%;border:0;outline:none;background:none;padding:18px 20px;font-size:18px}
+.qc-preview{display:flex;gap:6px;flex-wrap:wrap;padding:0 20px 14px;min-height:20px;font-size:13px}
+.qc-preview .chip{background:var(--accent-soft);border-color:transparent;color:var(--accent)}
+.qc-foot{border-top:1px solid var(--line);padding:10px 20px;display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:12px;flex-wrap:wrap}
+.qc-foot span{display:inline-flex;gap:5px;align-items:center;margin-right:10px}
+.form{padding:20px;display:grid;gap:12px}
+.form h2{margin:0 0 4px;font-size:17px;font-weight:600}
+.form label{display:grid;gap:4px;font-size:13px;color:var(--muted)}
+.form input,.form select,.form textarea{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:8px 10px;outline:none;color:var(--text)}
+.form input:focus,.form select:focus,.form textarea:focus{border-color:var(--accent)}
+.form .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form .actions{display:flex;justify-content:space-between;gap:8px;margin-top:6px}
+.help-grid{display:grid;grid-template-columns:auto 1fr;gap:10px 18px;align-items:center;font-size:14px}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:var(--bg);padding:9px 16px;border-radius:8px;opacity:0;transition:.2s;z-index:60;font-size:14px;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media (max-width:820px){
+  .app{grid-template-columns:1fr}
+  aside{position:static;height:auto;flex-direction:row;flex-wrap:wrap;border-right:0;border-bottom:1px solid var(--line);padding:10px 16px}
+  .brand{padding:6px 10px;width:100%}
+  .nav{width:auto}.nav kbd,.side-foot{display:none}
+  .capture-btn{margin:0;order:9;width:100%}
+  main{padding:20px 16px}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .board{grid-template-columns:1fr}
+  .search{width:100%}
+  .x{opacity:1}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <div class="brand"><i></i>Tech Dept</div>
+    <button class="capture-btn" onclick="openCapture()">+ จดงานด่วน <kbd>N</kbd></button>
+    <button class="nav" data-view="dashboard">ภาพรวม <kbd>1</kbd></button>
+    <button class="nav" data-view="tasks">งาน <kbd>2</kbd></button>
+    <button class="nav" data-view="members">ทีม <kbd>3</kbd></button>
+    <button class="nav" data-view="projects">โปรเจกต์ <kbd>4</kbd></button>
+    <div class="side-foot">กด <kbd>?</kbd> ดูคีย์ลัดทั้งหมด</div>
+  </aside>
+  <main id="main"></main>
+</div>
+
+<!-- Quick capture -->
+<div class="overlay" id="qc">
+  <div class="modal">
+    <input class="qc-input" id="qcInput" placeholder="พิมพ์งานแล้วกด Enter…  เช่น แก้บั๊ก login @Somchai #Website !high" autocomplete="off">
+    <div class="qc-preview" id="qcPreview"></div>
+    <div class="qc-foot">
+      <div><span><kbd>@</kbd>คนรับผิดชอบ</span><span><kbd>#</kbd>โปรเจกต์</span><span><kbd>!high</kbd>ความสำคัญ</span><span><kbd>^พรุ่งนี้</kbd>กำหนดส่ง</span></div>
+      <div><span><kbd>Enter</kbd>บันทึก</span><span><kbd>Shift+Enter</kbd>บันทึกแล้วจดต่อ</span><span><kbd>Esc</kbd>ปิด</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit form -->
+<div class="overlay" id="editor"><div class="modal"><form class="form" id="editForm"></form></div></div>
+
+<!-- Help -->
+<div class="overlay" id="help"><div class="modal"><div class="form">
+  <h2>คีย์ลัด</h2>
+  <div class="help-grid">
+    <kbd>N</kbd><div>จดงานด่วน (ใช้ได้ทุกหน้า)</div>
+    <kbd>Ctrl + K</kbd><div>จดงานด่วน (แม้กำลังพิมพ์อยู่)</div>
+    <kbd>1</kbd>–<kbd>4</kbd><div style="grid-column:2">สลับหน้า ภาพรวม / งาน / ทีม / โปรเจกต์</div>
+    <kbd>/</kbd><div>ค้นหา</div>
+    <kbd>Esc</kbd><div>ปิดหน้าต่าง</div>
+    <kbd>?</kbd><div>เปิดหน้านี้</div>
+  </div>
+  <div class="sub" style="margin-top:6px">ในช่องจดงาน: <kbd>@ชื่อ</kbd> <kbd>#โปรเจกต์</kbd> <kbd>!high</kbd>/<kbd>!med</kbd>/<kbd>!low</kbd> (หรือ <kbd>!!</kbd> = ด่วน) <kbd>^วันนี้</kbd>/<kbd>^พรุ่งนี้</kbd>/<kbd>^2026-12-01</kbd></div>
+</div></div></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const S = { tasks: [], members: [], projects: [], view: 'dashboard', q: '' };
+const STATUS = { todo: 'ต้องทำ', doing: 'กำลังทำ', done: 'เสร็จแล้ว' };
+const PRIO = { high: 'สูง', medium: 'กลาง', low: 'ต่ำ' };
+const PSTATUS = { active: 'กำลังดำเนินการ', paused: 'พักไว้', done: 'เสร็จสิ้น' };
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const byId = (col, id) => S[col].find(x => x.id === id);
+
+async function api(method, url, body) {
+  const r = await fetch('/api/' + url, { method, headers: { 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined });
+  if (!r.ok) { const e = await r.json().catch(() => ({})); toast(e.error || 'เกิดข้อผิดพลาด'); throw new Error(e.error); }
+  return r.status === 204 ? null : r.json();
+}
+async function loadAll() {
+  [S.tasks, S.members, S.projects] = await Promise.all(['tasks', 'members', 'projects'].map(c => api('GET', c)));
+  render();
+}
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 1800); }
+
+/* ---------- views ---------- */
+function go(view) { S.view = view; S.q = ''; location.hash = view; render(); }
+
+function render() {
+  document.querySelectorAll('.nav').forEach(b => b.classList.toggle('active', b.dataset.view === S.view));
+  ({ dashboard: viewDashboard, tasks: viewTasks, members: viewMembers, projects: viewProjects }[S.view] || viewDashboard)();
+}
+
+function header(title, sub, actions = '') {
+  return `<header class="page"><div><h1>${title}</h1><div class="sub">${sub}</div></div><div style="display:flex;gap:8px;flex-wrap:wrap">${actions}</div></header>`;
+}
+const searchBox = ph => `<input class="search" id="search" placeholder="${ph}  ( / )" value="${esc(S.q)}" oninput="S.q=this.value;renderBody()">`;
+
+function viewDashboard() {
+  const t = S.tasks, open = t.filter(x => x.status !== 'done');
+  const today = new Date().toISOString().slice(0, 10);
+  const overdue = open.filter(x => x.due && x.due < today);
+  const mine = open.filter(x => x.priority === 'high').slice(0, 6);
+  $('#main').innerHTML = header('ภาพรวม', new Date().toLocaleDateString('th-TH', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }),
+    `<button class="btn primary" onclick="openCapture()">+ จดงาน <kbd style="background:none;color:inherit;border-color:currentColor;opacity:.6">N</kbd></button>`) + `
+    <div class="stats">
+      <div class="stat"><b>${open.length}</b><span>งานค้าง</span></div>
+      <div class="stat"><b>${t.filter(x => x.status === 'doing').length}</b><span>กำลังทำ</span></div>
+      <div class="stat"><b style="color:${overdue.length ? 'var(--high)' : ''}">${overdue.length}</b><span>เลยกำหนด</span></div>
+      <div class="stat"><b>${S.members.length}</b><span>สมาชิกทีม</span></div>
+    </div>
+    <p class="section-title">งานด่วน</p>
+    <div class="list" style="margin-bottom:28px">${mine.length ? mine.map(taskRow).join('') : '<div class="empty">ไม่มีงานด่วน 🎉</div>'}</div>
+    <p class="section-title">ภาระงานของทีม</p>
+    <div class="list">${S.members.map(m => {
+      const n = open.filter(x => x.assigneeId === m.id).length, max = Math.max(1, ...S.members.map(mm => open.filter(x => x.assigneeId === mm.id).length));
+      return `<div class="row" onclick="go('tasks');S.q='@${esc(m.name)}';renderBody()"><div class="avatar">${esc(m.name[0])}</div><div class="grow">${esc(m.name)}<div class="muted">${esc(m.role)}</div></div><div class="bar"><i style="width:${n / max * 100}%"></i></div><div class="sub" style="width:60px;text-align:right">${n} งาน</div></div>`;
+    }).join('') || '<div class="empty">ยังไม่มีสมาชิก</div>'}</div>`;
+}
+
+function taskRow(t) {
+  return `<div class="row" onclick="editTask('${t.id}')"><span class="dot p-${t.priority}"></span><div class="grow">${esc(t.title)}<div class="muted">${metaText(t)}</div></div><span class="chip">${STATUS[t.status]}</span></div>`;
+}
+function metaText(t) {
+  return [byId('members', t.assigneeId)?.name && '@' + byId('members', t.assigneeId).name, byId('projects', t.projectId)?.name && '#' + byId('projects', t.projectId).name, t.due && '📅 ' + fmtDate(t.due)].filter(Boolean).map(esc).join(' · ');
+}
+function fmtDate(d) { return new Date(d + 'T00:00').toLocaleDateString('th-TH', { day: 'numeric', month: 'short' }); }
+
+function viewTasks() {
+  $('#main').innerHTML = header('งาน', 'ลากการ์ดเพื่อเปลี่ยนสถานะ · คลิกเพื่อแก้ไข', searchBox('ค้นหา / @คน / #โปรเจกต์') + `<button class="btn primary" onclick="openCapture()">+ จดงาน</button>`) + `<div id="body"></div>`;
+  renderBody();
+}
+function matchTask(t, q) {
+  if (!q) return true;
+  return q.toLowerCase().split(/\s+/).every(w => {
+    if (w.startsWith('@')) return (byId('members', t.assigneeId)?.name || '').toLowerCase().includes(w.slice(1));
+    if (w.startsWith('#')) return (byId('projects', t.projectId)?.name || '').toLowerCase().includes(w.slice(1));
+    return t.title.toLowerCase().includes(w);
+  });
+}
+function renderBody() {
+  const body = $('#body'); if (!body) return;
+  if (S.view === 'tasks') {
+    const list = S.tasks.filter(t => matchTask(t, S.q));
+    const order = { high: 0, medium: 1, low: 2 };
+    body.innerHTML = `<div class="board">${Object.keys(STATUS).map(st => {
+      const items = list.filter(t => t.status === st).sort((a, b) => order[a.priority] - order[b.priority]);
+      return `<div class="col" data-status="${st}"><h3>${STATUS[st]}<span>${items.length}</span></h3>${items.map(t => `
+        <div class="card ${st}" draggable="true" data-id="${t.id}" onclick="editTask('${t.id}')">
+          <div class="t">${esc(t.title)}</div>
+          <div class="meta"><span class="dot p-${t.priority}" title="${PRIO[t.priority]}"></span>${metaText(t)}</div>
+          <button class="x" title="ลบ" onclick="event.stopPropagation();del('tasks','${t.id}')">×</button>
+        </div>`).join('')}</div>`;
+    }).join('')}</div>`;
+    bindDnD();
+  } else if (S.view === 'members') {
+    const q = S.q.toLowerCase(), list = S.members.filter(m => (m.name + m.role).toLowerCase().includes(q));
+    body.innerHTML = `<div class="list">${list.map(m => {
+      const n = S.tasks.filter(t => t.assigneeId === m.id && t.status !== 'done').length;
+      return `<div class="row" onclick="editMember('${m.id}')"><div class="avatar">${esc(m.name[0])}</div><div class="grow">${esc(m.name)}<div class="muted">${esc(m.role)}${m.email ? ' · ' + esc(m.email) : ''}</div></div><span class="sub">${n} งานค้าง</span><button class="x" onclick="event.stopPropagation();del('members','${m.id}')">×</button></div>`;
+    }).join('') || '<div class="empty">ไม่พบสมาชิก</div>'}</div>`;
+  } else if (S.view === 'projects') {
+    const q = S.q.toLowerCase(), list = S.projects.filter(p => (p.name + p.description).toLowerCase().includes(q));
+    body.innerHTML = `<div class="list">${list.map(p => {
+      const all = S.tasks.filter(t => t.projectId === p.id), done = all.filter(t => t.status === 'done').length;
+      return `<div class="row" onclick="editProject('${p.id}')"><div class="grow">${esc(p.name)}<div class="muted">${esc(p.description || '—')}</div></div><span class="chip">${PSTATUS[p.status] || p.status}</span><div class="bar" title="${done}/${all.length}"><i style="width:${all.length ? done / all.length * 100 : 0}%"></i></div><span class="sub" style="width:44px;text-align:right">${done}/${all.length}</span><button class="x" onclick="event.stopPropagation();del('projects','${p.id}')">×</button></div>`;
+    }).join('') || '<div class="empty">ไม่พบโปรเจกต์</div>'}</div>`;
+  }
+}
+function viewMembers() {
+  $('#main').innerHTML = header('ทีม', `${S.members.length} คน`, searchBox('ค้นหาสมาชิก') + `<button class="btn primary" onclick="editMember()">+ เพิ่มสมาชิก</button>`) + `<div id="body"></div>`;
+  renderBody();
+}
+function viewProjects() {
+  $('#main').innerHTML = header('โปรเจกต์', `${S.projects.length} โปรเจกต์`, searchBox('ค้นหาโปรเจกต์') + `<button class="btn primary" onclick="editProject()">+ โปรเจกต์ใหม่</button>`) + `<div id="body"></div>`;
+  renderBody();
+}
+
+function bindDnD() {
+  document.querySelectorAll('.card').forEach(c => c.addEventListener('dragstart', e => e.dataTransfer.setData('text', c.dataset.id)));
+  document.querySelectorAll('.col').forEach(col => {
+    col.addEventListener('dragover', e => { e.preventDefault(); col.classList.add('drop'); });
+    col.addEventListener('dragleave', () => col.classList.remove('drop'));
+    col.addEventListener('drop', async e => {
+      e.preventDefault(); col.classList.remove('drop');
+      const t = byId('tasks', e.dataTransfer.getData('text'));
+      if (!t || t.status === col.dataset.status) return;
+      t.status = col.dataset.status; renderBody();
+      await api('PATCH', 'tasks/' + t.id, { status: t.status });
+      toast('ย้ายไป "' + STATUS[t.status] + '"');
+    });
+  });
+}
+
+async function del(col, id) {
+  const item = byId(col, id);
+  if (!confirm(`ลบ "${item.title || item.name}" ?`)) return;
+  await api('DELETE', `${col}/${id}`);
+  S[col] = S[col].filter(x => x.id !== id);
+  if (col !== 'tasks') await loadAll(); else render();
+  toast('ลบแล้ว');
+}
+
+/* ---------- quick capture ---------- */
+function parseCapture(raw) {
+  let text = raw, assigneeId = '', projectId = '', priority = 'medium', due = '';
+  const find = (col, w) => S[col].find(x => x.name.toLowerCase() === w.toLowerCase()) || S[col].find(x => x.name.toLowerCase().startsWith(w.toLowerCase()));
+  text = text.replace(/(^|\s)@(\S+)/g, (m, s, w) => { const f = find('members', w); if (f) { assigneeId = f.id; return s; } return m; });
+  text = text.replace(/(^|\s)#(\S+)/g, (m, s, w) => { const f = find('projects', w); if (f) { projectId = f.id; return s; } return m; });
+  text = text.replace(/(^|\s)!(high|h|สูง|ด่วน|!|med|medium|m|กลาง|low|l|ต่ำ)(?=\s|$)/gi, (m, s, w) => {
+    w = w.toLowerCase(); priority = ['high', 'h', 'สูง', 'ด่วน', '!'].includes(w) ? 'high' : ['low', 'l', 'ต่ำ'].includes(w) ? 'low' : 'medium'; return s;
+  });
+  text = text.replace(/(^|\s)\^(\S+)/g, (m, s, w) => {
+    const d = new Date(); const iso = x => new Date(x.getTime() - x.getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
+    if (/^(วันนี้|today)$/i.test(w)) due = iso(d);
+    else if (/^(พรุ่งนี้|tomorrow|tmr)$/i.test(w)) { d.setDate(d.getDate() + 1); due = iso(d); }
+    else if (/^\+(\d+)d?$/.test(w)) { d.setDate(d.getDate() + +w.match(/\d+/)[0]); due = iso(d); }
+    else if (/^\d{4}-\d{2}-\d{2}$/.test(w)) due = w;
+    else return m;
+    return s;
+  });
+  return { title: text.replace(/\s+/g, ' ').trim(), assigneeId, projectId, priority, due };
+}
+function openCapture() { closeAll(); $('#qc').classList.add('open'); const i = $('#qcInput'); i.value = ''; preview(); setTimeout(() => i.focus(), 10); }
+function preview() {
+  const p = parseCapture($('#qcInput').value);
+  $('#qcPreview').innerHTML = [
+    p.assigneeId && '👤 ' + byId('members', p.assigneeId).name,
+    p.projectId && '📁 ' + byId('projects', p.projectId).name,
+    p.priority !== 'medium' && '⚑ ' + PRIO[p.priority],
+    p.due && '📅 ' + fmtDate(p.due),
+  ].filter(Boolean).map(x => `<span class="chip">${esc(x)}</span>`).join('');
+}
+$('#qcInput').addEventListener('input', preview);
+$('#qcInput').addEventListener('keydown', async e => {
+  if (e.key !== 'Enter' || e.isComposing) return;
+  e.preventDefault();
+  const p = parseCapture(e.target.value);
+  if (!p.title) return;
+  const t = await api('POST', 'tasks', { ...p, status: 'todo' });
+  S.tasks.unshift(t);
+  toast('✓ จดแล้ว: ' + t.title);
+  if (e.shiftKey) { e.target.value = ''; preview(); } else closeAll();
+  render();
+});
+
+/* ---------- edit forms ---------- */
+function opts(map, val) { return Object.entries(map).map(([k, v]) => `<option value="${k}" ${k === val ? 'selected' : ''}>${v}</option>`).join(''); }
+function refOpts(col, val) { return `<option value="">— ไม่ระบุ —</option>` + S[col].map(x => `<option value="${x.id}" ${x.id === val ? 'selected' : ''}>${esc(x.name)}</option>`).join(''); }
+function openEditor(html, onSave) {
+  closeAll();
+  const f = $('#editForm'); f.innerHTML = html; $('#editor').classList.add('open');
+  f.onsubmit = async e => { e.preventDefault(); await onSave(Object.fromEntries(new FormData(f))); closeAll(); };
+  setTimeout(() => f.querySelector('input,textarea')?.focus(), 10);
+}
+const actions = `<div class="actions"><span class="sub" style="align-self:center"><kbd>Ctrl+Enter</kbd> บันทึก</span><div style="display:flex;gap:8px"><button type="button" class="btn" onclick="closeAll()">ยกเลิก</button><button class="btn primary">บันทึก</button></div></div>`;
+
+function editTask(id) {
+  const t = byId('tasks', id);
+  openEditor(`<h2>แก้ไขงาน</h2>
+    <label>ชื่องาน<input name="title" required value="${esc(t.title)}"></label>
+    <div class="two"><label>สถานะ<select name="status">${opts(STATUS, t.status)}</select></label><label>ความสำคัญ<select name="priority">${opts(PRIO, t.priority)}</select></label></div>
+    <div class="two"><label>ผู้รับผิดชอบ<select name="assigneeId">${refOpts('members', t.assigneeId)}</select></label><label>โปรเจกต์<select name="projectId">${refOpts('projects', t.projectId)}</select></label></div>
+    <label>กำหนดส่ง<input type="date" name="due" value="${esc(t.due)}"></label>
+    <label>โน้ต<textarea name="note" rows="3">${esc(t.note)}</textarea></label>${actions}`,
+    async data => { Object.assign(t, await api('PATCH', 'tasks/' + id, data)); render(); toast('บันทึกแล้ว'); });
+}
+function editMember(id) {
+  const m = id ? byId('members', id) : {};
+  openEditor(`<h2>${id ? 'แก้ไขสมาชิก' : 'เพิ่มสมาชิก'}</h2>
+    <label>ชื่อ (ใช้กับ @ ตอนจดงาน)<input name="name" required value="${esc(m.name)}"></label>
+    <label>ตำแหน่ง<input name="role" value="${esc(m.role)}" placeholder="เช่น Backend Developer"></label>
+    <label>อีเมล<input type="email" name="email" value="${esc(m.email)}"></label>${actions}`,
+    async data => { await api(id ? 'PATCH' : 'POST', 'members' + (id ? '/' + id : ''), data); await loadAll(); toast('บันทึกแล้ว'); });
+}
+function editProject(id) {
+  const p = id ? byId('projects', id) : {};
+  openEditor(`<h2>${id ? 'แก้ไขโปรเจกต์' : 'โปรเจกต์ใหม่'}</h2>
+    <label>ชื่อ (ใช้กับ # ตอนจดงาน)<input name="name" required value="${esc(p.name)}"></label>
+    <label>สถานะ<select name="status">${opts(PSTATUS, p.status || 'active')}</select></label>
+    <label>รายละเอียด<textarea name="description" rows="3">${esc(p.description)}</textarea></label>${actions}`,
+    async data => { await api(id ? 'PATCH' : 'POST', 'projects' + (id ? '/' + id : ''), data); await loadAll(); toast('บันทึกแล้ว'); });
+}
+
+/* ---------- keyboard ---------- */
+function closeAll() { document.querySelectorAll('.overlay').forEach(o => o.classList.remove('open')); }
+const anyOpen = () => !!document.querySelector('.overlay.open');
+document.addEventListener('keydown', e => {
+  const typing = /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName);
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); openCapture(); return; }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && $('#editor').classList.contains('open')) { e.preventDefault(); $('#editForm').requestSubmit(); return; }
+  if (e.key === 'Escape') { if (anyOpen()) closeAll(); else document.activeElement.blur(); return; }
+  if (typing || anyOpen() || e.ctrlKey || e.metaKey || e.altKey) return;
+  const k = e.key.toLowerCase();
+  if (k === 'n' || k === 'ื') { e.preventDefault(); openCapture(); }          // 'ื' = N key on Thai keyboard
+  else if (['1', '2', '3', '4'].includes(k)) go(['dashboard', 'tasks', 'members', 'projects'][+k - 1]);
+  else if (k === '/') { e.preventDefault(); if (S.view === 'dashboard') go('tasks'); $('#search')?.focus(); }
+  else if (e.key === '?') $('#help').classList.add('open');
+});
+document.querySelectorAll('.overlay').forEach(o => o.addEventListener('mousedown', e => { if (e.target === o) closeAll(); }));
+document.querySelectorAll('.nav').forEach(b => b.onclick = () => go(b.dataset.view));
+
+S.view = location.hash.slice(1) || 'dashboard';
+loadAll();
+</script>
+</body>
+</html>
