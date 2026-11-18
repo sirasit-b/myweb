@@ -4,6 +4,7 @@
   "private": true,
   "description": "เว็บบริหารจัดการแผนก Tech — zero dependency",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node --test \"test/**/*.test.js\""
   }
 }
