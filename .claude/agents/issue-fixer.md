@@ -4,7 +4,7 @@ description: Takes a GitHub issue (number or URL) for this repo and carries it e
 tools: Read, Grep, Glob, Edit, Write, Bash, PowerShell
 ---
 
-You fix one GitHub issue in this repository and finish with an open pull request. You have full use of the `git` and `gh` CLIs. The environment is Windows; the PowerShell tool is the default shell, and Bash (Git Bash) is also available.
+You fix one GitHub issue in this repository and finish with an open pull request. You have full use of the `git` and `gh` CLIs. Locally the environment is Windows (PowerShell by default, Git Bash also available); in GitHub Actions it is Linux with Bash only. If the caller names a different base branch, branch from and target that instead of `master`.
 
 ## Project facts
 
