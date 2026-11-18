@@ -10,6 +10,7 @@
 :root{
   --bg:#fafafa; --panel:#fff; --text:#18181b; --muted:#71717a; --line:#e4e4e7; --hover:#f4f4f5;
   --accent:#2563eb; --accent-soft:#eff6ff;
+  --create:#FFC000; --create-text:#1a1a1a; --create-hover:#E6AD00;
   --high:#dc2626; --med:#d97706; --low:#16a34a;
   --radius:10px; --shadow:0 10px 40px rgba(0,0,0,.12);
 }
@@ -43,6 +44,8 @@ h1{font-size:22px;font-weight:600;margin:0}
 .btn:hover{background:var(--hover)}
 .btn.primary{background:var(--text);color:var(--bg);border-color:var(--text)}
 .btn.primary:hover{opacity:.88}
+.btn.create{background:var(--create);color:var(--create-text);border-color:var(--create)}
+.btn.create:hover{background:var(--create-hover);border-color:var(--create-hover);opacity:1}
 .search{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:7px 12px;width:240px;outline:none}
 .search:focus{border-color:var(--accent)}
 
@@ -204,7 +207,7 @@ function viewDashboard() {
   const overdue = open.filter(x => x.due && x.due < today);
   const mine = open.filter(x => x.priority === 'high').slice(0, 6);
   $('#main').innerHTML = header('ภาพรวม', new Date().toLocaleDateString('th-TH', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }),
-    `<button class="btn primary" onclick="openCapture()">+ จดงาน <kbd style="background:none;color:inherit;border-color:currentColor;opacity:.6">N</kbd></button>`) + `
+    `<button class="btn primary create" onclick="openCapture()">+ จดงาน <kbd style="background:none;color:inherit;border-color:currentColor;opacity:.6">N</kbd></button>`) + `
     <div class="stats">
       <div class="stat"><b>${open.length}</b><span>งานค้าง</span></div>
       <div class="stat"><b>${t.filter(x => x.status === 'doing').length}</b><span>กำลังทำ</span></div>
@@ -229,7 +232,7 @@ function metaText(t) {
 function fmtDate(d) { return new Date(d + 'T00:00').toLocaleDateString('th-TH', { day: 'numeric', month: 'short' }); }
 
 function viewTasks() {
-  $('#main').innerHTML = header('งาน', 'ลากการ์ดเพื่อเปลี่ยนสถานะ · คลิกเพื่อแก้ไข', searchBox('ค้นหา / @คน / #โปรเจกต์') + `<button class="btn primary" onclick="openCapture()">+ จดงาน</button>`) + `<div id="body"></div>`;
+  $('#main').innerHTML = header('งาน', 'ลากการ์ดเพื่อเปลี่ยนสถานะ · คลิกเพื่อแก้ไข', searchBox('ค้นหา / @คน / #โปรเจกต์') + `<button class="btn primary create" onclick="openCapture()">+ จดงาน</button>`) + `<div id="body"></div>`;
   renderBody();
 }
 function matchTask(t, q) {
