@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>สวัสดีโลก</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&family=Space+Grotesk:wght@400;600;700&display=swap">
+<style>
+  :root {
+    --bg: #0f0f13;
+    --bg2: #17171f;
+    --fg: #eeeef2;
+    --fg2: #9898aa;
+    --accent: #7c6dfa;
+    --accent2: #c27dff;
+    --card: #1e1e2a;
+    --border: #2e2e40;
+    color-scheme: dark;
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg: #f5f4fc; --bg2: #eeeef8; --fg: #18181f; --fg2: #5a5a72;
+      --accent: #5b48f5; --accent2: #9f4ee8; --card: #ffffff; --border: #d8d8e8;
+      color-scheme: light;
+    }
+  }
+  :root[data-theme="light"] {
+    --bg: #f5f4fc; --bg2: #eeeef8; --fg: #18181f; --fg2: #5a5a72;
+    --accent: #5b48f5; --accent2: #9f4ee8; --card: #ffffff; --border: #d8d8e8;
+    color-scheme: light;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Sarabun', system-ui, sans-serif;
+    background: var(--bg); color: var(--fg);
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 0; line-height: 1.6;
+  }
+  nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 0; border-bottom: 1px solid var(--border);
+    max-width: 1100px; margin: 0 auto;
+  }
+  .logo {
+    font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.1rem;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .nav-links { display: flex; gap: 28px; list-style: none; }
+  .nav-links a { color: var(--fg2); text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--fg); }
+  .hero {
+    max-width: 1100px; margin: 0 auto; padding-block: 80px 70px;
+    display: flex; flex-direction: column; align-items: center; text-align: center; gap: 24px;
+  }
+  .eyebrow {
+    font-size: 0.8rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--accent); padding: 6px 16px; border: 1px solid var(--accent);
+    border-radius: 999px; display: inline-block; opacity: 0.85;
+  }
+  h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(2.4rem, 7vw, 4.2rem); font-weight: 700;
+    line-height: 1.08; text-wrap: balance; letter-spacing: -1.5px; max-width: 760px;
+  }
+  h1 .gradient {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .subtitle { color: var(--fg2); font-size: 1.1rem; max-width: 480px; text-wrap: balance; line-height: 1.7; }
+  .hero-cta { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
+  .btn-primary {
+    padding: 13px 28px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff; border: none; border-radius: 10px; font-size: 0.95rem; font-weight: 600;
+    cursor: pointer; transition: opacity 0.2s, transform 0.15s;
+    font-family: 'Sarabun', sans-serif; text-decoration: none; display: inline-block;
+  }
+  .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+  .btn-secondary {
+    padding: 13px 28px; background: transparent; color: var(--fg);
+    border: 1px solid var(--border); border-radius: 10px; font-size: 0.95rem; font-weight: 600;
+    cursor: pointer; transition: border-color 0.2s, transform 0.15s;
+    font-family: 'Sarabun', sans-serif; text-decoration: none; display: inline-block;
+  }
+  .btn-secondary:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .stats-strip { background: var(--bg2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .stats-inner {
+    max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-around;
+    padding: 30px 0; flex-wrap: wrap; gap: 20px;
+  }
+  .stat { text-align: center; }
+  .stat-num {
+    font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .stat-label { font-size: 0.82rem; color: var(--fg2); margin-top: 2px; }
+  .cards-section { max-width: 1100px; margin: 0 auto; padding-block: 70px; }
+  .section-title { font-family: 'Space Grotesk', sans-serif; font-size: 1.7rem; font-weight: 700; text-align: center; margin-bottom: 10px; letter-spacing: -0.5px; }
+  .section-sub { text-align: center; color: var(--fg2); margin-bottom: 44px; font-size: 0.95rem; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+  .card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+    padding: 28px 26px; transition: transform 0.2s, box-shadow 0.2s; cursor: default;
+  }
+  .card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(124, 109, 250, 0.12); }
+  .card-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; margin-bottom: 18px; }
+  .icon-purple { background: rgba(124,109,250,0.15); }
+  .icon-pink { background: rgba(194,125,255,0.15); }
+  .icon-teal { background: rgba(80,215,195,0.15); }
+  .card h3 { font-family: 'Space Grotesk', sans-serif; font-size: 1.05rem; font-weight: 600; margin-bottom: 8px; }
+  .card p { color: var(--fg2); font-size: 0.88rem; line-height: 1.65; }
+  .card-tag { display: inline-block; margin-top: 16px; font-size: 0.75rem; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); color: var(--fg2); }
+  .about-strip { background: var(--bg2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .about-inner { max-width: 1100px; margin: 0 auto; padding-block: 60px; display: flex; align-items: center; gap: 50px; flex-wrap: wrap; }
+  .about-text { flex: 1; min-width: 260px; }
+  .about-text h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.5rem; font-weight: 700; margin-bottom: 14px; letter-spacing: -0.5px; }
+  .about-text p { color: var(--fg2); font-size: 0.95rem; line-height: 1.75; }
+  .about-visual { flex: 1; min-width: 260px; display: flex; justify-content: center; }
+  .deco-svg { width: 100%; max-width: 320px; }
+  footer {
+    max-width: 1100px; margin: 0 auto; padding-block: 32px;
+    border-top: 1px solid var(--border); display: flex; align-items: center;
+    justify-content: space-between; flex-wrap: wrap; gap: 12px;
+  }
+  .footer-copy { font-size: 0.82rem; color: var(--fg2); }
+  .footer-links { display: flex; gap: 20px; }
+  .footer-links a { font-size: 0.82rem; color: var(--fg2); text-decoration: none; transition: color 0.2s; }
+  .footer-links a:hover { color: var(--accent); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  @media (max-width: 600px) {
+    .nav-links { display: none; }
+    .about-inner { flex-direction: column; }
+    .deco-svg { max-width: 220px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .card, .btn-primary, .btn-secondary { transition: none; }
+  }
+</style>
+</head>
+<body>
+<nav>
+  <span class="logo">◈ MySpace</span>
+  <ul class="nav-links">
+    <li><a href="#">หน้าแรก</a></li>
+    <li><a href="#">เกี่ยวกับ</a></li>
+    <li><a href="#">ผลงาน</a></li>
+    <li><a href="#">ติดต่อ</a></li>
+  </ul>
+</nav>
+
+<section class="hero">
+  <span class="eyebrow">ยินดีต้อนรับ</span>
+  <h1>เว็บไซต์เรียบง่าย<br><span class="gradient">แต่สวยงาม</span></h1>
+  <p class="subtitle">นี่คือตัวอย่างเว็บไซต์ที่ออกแบบอย่างใส่ใจ — เรียบง่าย อ่านง่าย และรองรับทุกอุปกรณ์</p>
+  <div class="hero-cta">
+    <a href="#" class="btn-primary">เริ่มต้นเลย</a>
+    <a href="#" class="btn-secondary">ดูตัวอย่าง</a>
+  </div>
+</section>
+
+<div class="stats-strip">
+  <div class="stats-inner">
+    <div class="stat"><div class="stat-num">99%</div><div class="stat-label">Lighthouse Score</div></div>
+    <div class="stat"><div class="stat-num">0.3s</div><div class="stat-label">Load Time</div></div>
+    <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Responsive</div></div>
+    <div class="stat"><div class="stat-num">A+</div><div class="stat-label">Accessibility</div></div>
+  </div>
+</div>
+
+<section class="cards-section">
+  <h2 class="section-title">สิ่งที่เราทำได้</h2>
+  <p class="section-sub">ฟีเจอร์หลักของเว็บไซต์นี้</p>
+  <div class="cards">
+    <div class="card">
+      <div class="card-icon icon-purple">⚡</div>
+      <h3>โหลดเร็ว</h3>
+      <p>ไม่มี dependency ภายนอกที่ไม่จำเป็น โค้ดสะอาด และเบา ทำให้เว็บโหลดได้รวดเร็วมาก</p>
+      <span class="card-tag">Performance</span>
+    </div>
+    <div class="card">
+      <div class="card-icon icon-pink">🎨</div>
+      <h3>ดีไซน์สวยงาม</h3>
+      <p>ออกแบบด้วยหลักการ Typography และ Color Theory ที่ดี รองรับทั้ง Light และ Dark Mode</p>
+      <span class="card-tag">Design</span>
+    </div>
+    <div class="card">
+      <div class="card-icon icon-teal">📱</div>
+      <h3>Responsive</h3>
+      <p>แสดงผลได้สวยงามทั้งบนมือถือ แท็บเล็ต และคอมพิวเตอร์ ด้วย Flexible Grid Layout</p>
+      <span class="card-tag">Mobile-first</span>
+    </div>
+  </div>
+</section>
+
+<div class="about-strip">
+  <div class="about-inner">
+    <div class="about-text">
+      <h2>เกี่ยวกับเว็บนี้</h2>
+      <p>เว็บไซต์นี้สร้างด้วย HTML, CSS และ JavaScript ล้วน ๆ ไม่ผ่าน Framework ใดทั้งสิ้น แสดงให้เห็นว่าเว็บ "เรียบง่าย" ก็สามารถดูดีและทำงานได้อย่างมีประสิทธิภาพ — เพียงแค่ใส่ใจในรายละเอียด</p>
+    </div>
+    <div class="about-visual">
+      <svg class="deco-svg" viewBox="0 0 320 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="160" cy="110" r="95" stroke="var(--border)" stroke-width="1" stroke-dasharray="6 4"/>
+        <circle cx="160" cy="110" r="65" stroke="var(--border)" stroke-width="1" stroke-dasharray="4 6"/>
+        <circle cx="160" cy="110" r="38" fill="var(--accent)" fill-opacity="0.12"/>
+        <circle cx="160" cy="110" r="22" fill="var(--accent)" fill-opacity="0.22"/>
+        <text x="160" y="116" text-anchor="middle" font-family="Space Grotesk,sans-serif" font-size="18" font-weight="700" fill="var(--accent)">◈</text>
+        <circle cx="255" cy="110" r="7" fill="var(--accent2)" fill-opacity="0.7"/>
+        <circle cx="160" cy="15" r="5" fill="var(--accent)" fill-opacity="0.6"/>
+        <circle cx="77" cy="155" r="6" fill="var(--accent2)" fill-opacity="0.5"/>
+        <circle cx="200" cy="190" r="4" fill="var(--accent)" fill-opacity="0.5"/>
+        <line x1="160" y1="110" x2="255" y2="110" stroke="var(--accent2)" stroke-width="1" stroke-opacity="0.3"/>
+        <line x1="160" y1="110" x2="160" y2="15" stroke="var(--accent)" stroke-width="1" stroke-opacity="0.3"/>
+        <line x1="160" y1="110" x2="77" y2="155" stroke="var(--accent2)" stroke-width="1" stroke-opacity="0.3"/>
+        <line x1="160" y1="110" x2="200" y2="190" stroke="var(--accent)" stroke-width="1" stroke-opacity="0.3"/>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <span class="footer-copy">© 2026 MySpace — สร้างด้วย ♡</span>
+  <div class="footer-links">
+    <a href="#">Privacy</a>
+    <a href="#">Terms</a>
+    <a href="#">Contact</a>
+  </div>
+</footer>
+</body>
+</html>
