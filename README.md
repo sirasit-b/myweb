@@ -1,37 +1,37 @@
 # Tech Department Manager
 
-A zero-dependency web app for managing a Tech department (tasks / members / projects), with a **mobile app for reporting problems** that sends reports to GitHub so the AI team can pick them up and work on them automatically.
+เว็บแอปแบบไม่พึ่งพาไลบรารีภายนอก (zero-dependency) สำหรับบริหารแผนก Tech (งาน / สมาชิก / โปรเจกต์) พร้อม **แอปมือถือสำหรับแจ้งปัญหา** ที่ส่งรายงานไปยัง GitHub เพื่อให้ทีม AI รับเรื่องไปทำงานต่อโดยอัตโนมัติ
 
-## Run
+## วิธีรัน
 
 ```bash
 npm start            # http://localhost:3000
-npm test             # all tests (Node 22+)
+npm test             # รันเทสต์ทั้งหมด (Node 22+)
 ```
 
-- Main web app: `/`
-- Landing: `/simple.html`
-- Mobile problem-reporting app (PWA): `/app/`
+- เว็บแอปหลัก: `/`
+- หน้า Landing: `/simple.html`
+- แอปมือถือสำหรับแจ้งปัญหา (PWA): `/app/`
 
-## Mobile app → GitHub issue
+## แอปมือถือ → GitHub issue
 
-Set these variables when starting the server (the token stays on the server only and is never sent to the phone):
+ตั้งค่าตัวแปรเหล่านี้ตอนเริ่มเซิร์ฟเวอร์ (โทเคนอยู่บนเซิร์ฟเวอร์เท่านั้น ไม่ถูกส่งไปที่โทรศัพท์):
 
 ```bash
 GITHUB_TOKEN=<fine-grained token: Issues read/write for this repo only> GITHUB_REPO=sirasit-b/myweb npm start
 ```
 
-- Open `/app/` on your phone and choose *Add to Home Screen* to install it as an app (it must be served over HTTPS to be installable and work offline).
-- The "Report" tab ("แจ้งเรื่อง") creates an issue with the label `source:mobile-app`.
-- The "My issues" tab ("เรื่องของฉัน") shows the real status from GitHub: received → triaged → planned → in development → in review → released
+- เปิด `/app/` บนโทรศัพท์ แล้วเลือก *Add to Home Screen* เพื่อติดตั้งเป็นแอป (ต้องให้บริการผ่าน HTTPS จึงจะติดตั้งและใช้งานออฟไลน์ได้)
+- แท็บ "แจ้งเรื่อง" จะสร้าง issue พร้อม label `source:mobile-app`
+- แท็บ "เรื่องของฉัน" แสดงสถานะจริงจาก GitHub: รับเรื่อง → คัดแยก → วางแผน → กำลังพัฒนา → รอรีวิว → ปล่อยแล้ว
 
-- `PORT`: Port (default 3000)
-- `DATA_FILE`: Data file (default `data/db.json`)
-- `GITHUB_TOKEN`: Token used to create issues
-- `GITHUB_REPO`: `owner/repo` where issues are opened
-- `GITHUB_API`: Used in tests to point at a fake GitHub
+- `PORT`: พอร์ต (ค่าเริ่มต้น 3000)
+- `DATA_FILE`: ไฟล์ข้อมูล (ค่าเริ่มต้น `data/db.json`)
+- `GITHUB_TOKEN`: โทเคนที่ใช้สร้าง issue
+- `GITHUB_REPO`: `owner/repo` ที่จะเปิด issue
+- `GITHUB_API`: ใช้ในเทสต์เพื่อชี้ไปที่ GitHub จำลอง
 
 ## AI-native SDLC
 
-Every issue goes through automated agents: triage → plan → implement (TDD) → code / security / QA review → documentation → merge → release.
-Details and setup are in [docs/AI-SDLC.md](docs/AI-SDLC.md).
+ทุก issue ผ่านเอเจนต์อัตโนมัติ: triage → วางแผน → พัฒนา (TDD) → รีวิวโค้ด / ความปลอดภัย / QA → เอกสาร → merge → release
+รายละเอียดและวิธีตั้งค่าอยู่ใน [docs/AI-SDLC.md](docs/AI-SDLC.md)
