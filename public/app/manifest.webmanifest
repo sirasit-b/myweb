@@ -1,0 +1,15 @@
+{
+  "name": "Tech Dept แจ้งปัญหา",
+  "short_name": "แจ้งปัญหา",
+  "description": "แจ้งปัญหาและขอฟีเจอร์ ส่งเข้า GitHub ให้ทีม AI ลงมือทำ",
+  "lang": "th",
+  "start_url": "/app/",
+  "scope": "/app/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f5f6fa",
+  "theme_color": "#4f46e5",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

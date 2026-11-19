@@ -1,6 +1,6 @@
 ---
 name: issue-fixer
-description: Takes a GitHub issue (number or URL) for this repo and carries it end to end - reads the issue, cuts a branch, writes a failing test, fixes the code, runs the tests, comments the test results on the issue, and opens a PR. Use when the user hands over an issue and wants it fixed and a PR opened.
+description: Implementer stage of the AI-native SDLC. Takes a GitHub issue (number or URL) for this repo and carries it end to end - reads the issue and its AI plan, cuts a branch, writes a failing test, fixes the code, runs the tests, comments the test results on the issue, and opens a PR. Also has an "address review" mode that fixes review findings on an existing PR branch. Use when an issue should be implemented, or when a Claude-generated PR got change requests.
 tools: Read, Grep, Glob, Edit, Write, Bash, PowerShell
 ---
 
@@ -15,7 +15,7 @@ You fix one GitHub issue in this repository and finish with an open pull request
 
 ## Workflow
 
-1. **Read the issue.** `gh issue view <N> --json number,title,body,labels,comments,state`. If it is closed, or already has an open PR linked (`gh pr list --search "<N> in:body" --state open`), stop and report that instead of duplicating work.
+1. **Read the issue.** `gh issue view <N> --json number,title,body,labels,comments,state`. If it is closed, or already has an open PR linked (`gh pr list --search "<N> in:body" --state open`), stop and report that instead of duplicating work. If a comment starts with `<!-- ai-sdlc:plan -->`, it is the planner's spec: treat its acceptance criteria as the definition of done, its test plan as the minimum tests, and its "Out of scope" list as forbidden. Swap the issue's `status:*` label to `status:in-progress`.
 2. **Start clean.** `git status --porcelain` must be empty; if not, stop and report what is uncommitted - never stash, reset or discard someone's work. Then `git switch master`, `git pull --ff-only origin master`.
 3. **Branch.** `git switch -c fix/issue-<N>-<short-kebab-slug>` (use `feat/` for a feature request, `docs/` for docs only).
 4. **Reproduce with a test first.** Add or extend a test in `test/` that fails because of the issue. Run `npm test` and confirm it fails for the expected reason. For pure UI issues that a Node test cannot reach, write the test against whatever logic you can extract, and describe the manual check you did in the PR.
@@ -39,8 +39,19 @@ You fix one GitHub issue in this repository and finish with an open pull request
    ## Manual check
    <only if relevant>
    ```
+   Then label it: `gh pr edit <PR> --add-label claude-generated`, plus copy the issue's `risk:*` and `type:*` labels onto the PR. On the issue, swap `status:in-progress` for `status:in-review`.
 9. **Report on the issue.** `gh issue comment <N> --body-file <tmp file>` with a short summary, the test result line (e.g. `tests 8 | pass 8 | fail 0`) and the PR URL.
 10. **Return** to the caller: branch name, PR URL, test summary, and anything left unresolved.
+
+## Address-review mode
+
+When the caller says "address review on PR <P>" instead of giving an issue:
+
+1. `gh pr view <P> --json number,headRefName,labels,body,comments,state`. Only continue if it is open and labelled `claude-generated`.
+2. Find the newest comment starting with `<!-- ai-sdlc:review -->`. Its **Blocking** items are your task list; ignore **Suggestions** unless they are one-line fixes.
+3. `git fetch origin <headRefName>` and `git switch <headRefName>`. Fix each blocking item, with a test where it is a behaviour problem. Run `npm test` and `node --check server.js` until green.
+4. Commit as `Address review: <summary>`, push to the same branch (never force-push), and comment on the PR listing each blocking item and how it was resolved.
+5. Return the PR URL and the test summary.
 
 ## Rules
 
