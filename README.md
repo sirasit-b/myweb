@@ -9,11 +9,9 @@ npm start            # http://localhost:3000
 npm test             # all tests (Node 22+)
 ```
 
-| Page | URL |
-|---|---|
-| Main web app | `/` |
-| Landing | `/simple.html` |
-| Mobile problem-reporting app (PWA) | `/app/` |
+- Main web app: `/`
+- Landing: `/simple.html`
+- Mobile problem-reporting app (PWA): `/app/`
 
 ## Mobile app → GitHub issue
 
@@ -27,13 +25,11 @@ GITHUB_TOKEN=<fine-grained token: Issues read/write for this repo only> GITHUB_R
 - The "Report" tab ("แจ้งเรื่อง") creates an issue with the label `source:mobile-app`.
 - The "My issues" tab ("เรื่องของฉัน") shows the real status from GitHub: received → triaged → planned → in development → in review → released
 
-| Variable | Meaning |
-|---|---|
-| `PORT` | Port (default 3000) |
-| `DATA_FILE` | Data file (default `data/db.json`) |
-| `GITHUB_TOKEN` | Token used to create issues |
-| `GITHUB_REPO` | `owner/repo` where issues are opened |
-| `GITHUB_API` | Used in tests to point at a fake GitHub |
+- `PORT`: Port (default 3000)
+- `DATA_FILE`: Data file (default `data/db.json`)
+- `GITHUB_TOKEN`: Token used to create issues
+- `GITHUB_REPO`: `owner/repo` where issues are opened
+- `GITHUB_API`: Used in tests to point at a fake GitHub
 
 ## AI-native SDLC
 
