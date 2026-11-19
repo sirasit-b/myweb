@@ -82,6 +82,7 @@ flowchart LR
 - อัตโนมัติเต็มรูปแบบเฉพาะงาน `risk:low` เท่านั้น; อะไรที่แตะ `.github/`, auth, dependency, การลบข้อมูล ต้องมีคนอนุมัติเสมอ
 - รอบแก้ตาม review สูงสุด 2 รอบ แล้วหยุดที่ `needs-human` กันวนไม่รู้จบ
 - PR จาก fork ไม่รัน Claude (กัน secrets รั่ว)
+- `claude-pr-review.yml` ตรวจท้ายงานว่ามีคอมเมนต์ `<!-- ai-sdlc:review -->` จริง ถ้า Claude จบโดยไม่ได้รีวิว (เช่น agent ยังไม่อยู่บน master เพราะ action โหลด `.claude/` จาก base branch เสมอ) run จะเป็นสีแดง ไม่ใช่เขียวหลอก ๆ
 - agent ห้าม push เข้า master, force-push, หรือ merge เอง; merge ทำได้เฉพาะ orchestrator เมื่อเปิด `AUTO_MERGE`
 
 ## ข้อจำกัดที่ควรรู้
