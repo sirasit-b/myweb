@@ -1,0 +1,57 @@
+# Run once from the Actions tab: creates every label the AI-native SDLC uses.
+name: Setup AI-SDLC labels
+
+on:
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  labels:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create labels
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          while IFS='|' read -r name color desc; do
+            [ -z "$name" ] && continue
+            gh label create "$name" --color "$color" --description "$desc" --force
+          done <<'EOF'
+          type:bug|d73a4a|Something is broken
+          type:feature|a2eeef|New capability
+          type:chore|cfd3d7|Maintenance
+          type:docs|0075ca|Documentation only
+          size:S|c2e0c6|One file, small change
+          size:M|fef2c0|A few files
+          size:L|f9d0c4|Large or unclear scope
+          risk:low|0e8a16|Safe to automate end to end
+          risk:medium|fbca04|Needs a careful review
+          risk:high|b60205|Security, data, CI or dependencies
+          area:api|1d76db|server.js API
+          area:web|5319e7|Desktop web UI
+          area:mobile|e99695|Mobile PWA
+          area:infra|006b75|CI, workflows, tooling
+          status:needs-info|d876e3|Waiting for the reporter
+          status:triaged|bfdadc|Classified by the triager
+          status:planned|bfd4f2|AI plan posted
+          status:awaiting-approval|fbca04|Add claude-fix to start
+          status:in-progress|1d76db|Implementer is working
+          status:in-review|5319e7|PR open, under review
+          status:released|0e8a16|Shipped in a release
+          auto-build|0e8a16|Planner judged it safe to auto-implement
+          claude-fix|7057ff|Start the Claude implementer
+          claude-generated|7057ff|PR opened by Claude
+          claude-round-1|ededed|First automatic fix round
+          claude-round-2|ededed|Second automatic fix round
+          ai-review:pass|0e8a16|AI review passed
+          ai-review:changes|d93f0b|AI review requested changes
+          ready-to-merge|0e8a16|All gates green
+          needs-human|b60205|Automation stopped; a person must decide
+          source:mobile-app|e99695|Reported from the mobile app
+          source:ci|006b75|Filed by the CI doctor
+          breaking|b60205|Breaking change (major version)
+          duplicate|cfd3d7|Duplicate of another issue
+          EOF

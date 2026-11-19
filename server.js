@@ -49,6 +49,7 @@ function save(db) {
 }
 
 let db = load();
+db.reports ||= [];
 
 function send(res, code, body) {
   res.writeHead(code, { 'Content-Type': 'application/json; charset=utf-8' });
@@ -63,11 +64,14 @@ function readBody(req) {
   });
 }
 
-const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.ico': 'image/x-icon' };
+const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.json': 'application/json', '.webmanifest': 'application/manifest+json', '.png': 'image/png' };
 
 function serveStatic(req, res) {
-  const urlPath = decodeURIComponent(req.url.split('?')[0]);
-  const file = path.normalize(path.join(PUBLIC_DIR, urlPath === '/' ? 'index.html' : urlPath));
+  let urlPath;
+  try { urlPath = decodeURIComponent(req.url.split('?')[0]); } catch { return send(res, 400, { error: 'bad path' }); }
+  if (urlPath === '/app') { res.writeHead(301, { Location: '/app/' }); return res.end(); }
+  if (urlPath.endsWith('/')) urlPath += 'index.html';
+  const file = path.normalize(path.join(PUBLIC_DIR, urlPath));
   if (!file.startsWith(PUBLIC_DIR)) return send(res, 403, { error: 'forbidden' });
   fs.readFile(file, (err, buf) => {
     if (err) return send(res, 404, { error: 'not found' });
@@ -88,7 +92,125 @@ function pick(col, body) {
   return out;
 }
 
+// ---- Mobile reports → GitHub issues ------------------------------------
+// The GitHub token stays on the server; the phone only talks to /api/reports.
+const GITHUB_API = (process.env.GITHUB_API || 'https://api.github.com').replace(/\/+$/, '');
+const GITHUB_REPO = process.env.GITHUB_REPO || '';
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN || '';
+const REPORT_KINDS = { bug: 'type:bug', feature: 'type:feature' };
+const STAGES = [ // first matching label wins; order = furthest along first
+  ['status:released', 'released'], ['status:in-review', 'review'], ['status:in-progress', 'building'],
+  ['status:awaiting-approval', 'waiting-approval'], ['status:planned', 'planned'],
+  ['status:triaged', 'triaged'], ['status:needs-info', 'needs-info'],
+];
+const recent = new Map(); // ip -> timestamps, 5 reports per minute
+
+function githubReady() { return GITHUB_TOKEN && /^[\w.-]+\/[\w.-]+$/.test(GITHUB_REPO); }
+
+async function github(method, apiPath, body) {
+  const r = await fetch(`${GITHUB_API}/repos/${GITHUB_REPO}${apiPath}`, {
+    method,
+    headers: {
+      Authorization: `Bearer ${GITHUB_TOKEN}`,
+      Accept: 'application/vnd.github+json',
+      'User-Agent': 'myweb-mobile-reports',
+      'Content-Type': 'application/json',
+    },
+    body: body ? JSON.stringify(body) : undefined,
+    signal: AbortSignal.timeout(10000),
+  });
+  if (!r.ok) throw new Error(`GitHub ${r.status}`);
+  return r.json();
+}
+
+function stageOf(issue) {
+  if (issue.state === 'closed' && issue.state_reason !== 'not_planned') {
+    const names = (issue.labels || []).map(l => l.name);
+    return names.includes('status:released') ? 'released' : 'done';
+  }
+  if (issue.state === 'closed') return 'closed';
+  const names = (issue.labels || []).map(l => l.name);
+  return (STAGES.find(([label]) => names.includes(label)) || [, 'received'])[1];
+}
+
+const clean = (v, max) => String(v ?? '').replace(/\r/g, '').trim().slice(0, max);
+
+async function handleReports(req, res, reportId, query) {
+  if (req.method === 'GET' && !reportId) {
+    const device = clean(query.get('device'), 64);
+    if (!device) return send(res, 400, { error: 'device is required' });
+    return send(res, 200, db.reports.filter(r => r.device === device).slice(0, 50).map(publicReport));
+  }
+
+  if (req.method === 'GET' && reportId) {
+    const rep = db.reports.find(r => r.id === reportId);
+    if (!rep) return send(res, 404, { error: 'not found' });
+    if (!githubReady()) return send(res, 200, publicReport(rep));
+    try {
+      const issue = await github('GET', `/issues/${rep.issueNumber}`);
+      rep.stage = stageOf(issue);
+      rep.checkedAt = Date.now();
+      save(db);
+    } catch { /* keep the last known stage */ }
+    return send(res, 200, publicReport(rep));
+  }
+
+  if (req.method === 'POST' && !reportId) {
+    if (!githubReady()) return send(res, 503, { error: 'ยังไม่ได้ตั้งค่า GITHUB_TOKEN / GITHUB_REPO บนเซิร์ฟเวอร์' });
+    const ip = req.socket.remoteAddress || '';
+    const now = Date.now();
+    const times = (recent.get(ip) || []).filter(t => now - t < 60000);
+    if (times.length >= 5) return send(res, 429, { error: 'ส่งถี่เกินไป ลองใหม่อีกครั้งในอีกสักครู่' });
+
+    const b = await readBody(req);
+    const kind = REPORT_KINDS[b.kind] ? b.kind : null;
+    const title = clean(b.title, 120).replace(/\s+/g, ' ');
+    const description = clean(b.description, 4000);
+    const steps = clean(b.steps, 2000);
+    const device = clean(b.device, 64);
+    const platform = clean(b.platform, 120).replace(/[\s`]+/g, ' ');
+    if (!kind) return send(res, 400, { error: 'kind must be bug or feature' });
+    if (title.length < 4) return send(res, 400, { error: 'กรุณาใส่หัวข้ออย่างน้อย 4 ตัวอักษร' });
+    if (description.length < 10) return send(res, 400, { error: 'กรุณาอธิบายอย่างน้อย 10 ตัวอักษร' });
+    if (!device) return send(res, 400, { error: 'device is required' });
+
+    // User text is quoted and framed so the AI agents read it as a report, not as instructions.
+    const noPing = s => s.replace(/@(?=\w)/g, '@​'); // don't notify GitHub users from app text
+    const quote = s => noPing(s).split('\n').map(l => '> ' + l).join('\n');
+    const body = [
+      '<!-- source: mobile-app -->',
+      `_รายงานจากแอปมือถือ (${kind === 'bug' ? 'แจ้งปัญหา' : 'ขอฟีเจอร์'}) — ข้อความด้านล่างเป็นของผู้ใช้_`,
+      '', '### รายละเอียด', quote(description),
+      ...(steps ? ['', '### ขั้นตอนที่ทำให้เกิดปัญหา', quote(steps)] : []),
+      ...(platform ? ['', `**อุปกรณ์:** \`${platform}\``] : []),
+    ].join('\n');
+
+    let issue;
+    try {
+      issue = await github('POST', '/issues', { title: noPing(title), body, labels: ['source:mobile-app', REPORT_KINDS[kind], 'area:mobile'] });
+    } catch {
+      return send(res, 502, { error: 'ส่งไป GitHub ไม่สำเร็จ ลองใหม่อีกครั้ง' });
+    }
+    times.push(now); recent.set(ip, times);
+    if (!Number.isInteger(issue.number) || !/^https:\/\//.test(issue.html_url || '')) return send(res, 502, { error: 'GitHub ตอบกลับไม่ถูกต้อง' });
+    const rep = { id: id(), device, kind, title, issueNumber: issue.number, issueUrl: issue.html_url, stage: 'received', createdAt: now };
+    db.reports.unshift(rep);
+    db.reports.length = Math.min(db.reports.length, 1000);
+    save(db);
+    return send(res, 201, publicReport(rep));
+  }
+
+  send(res, 405, { error: 'method not allowed' });
+}
+
+function publicReport({ device, ...rest }) { return rest; }
+
 const server = http.createServer(async (req, res) => {
+  const rm = req.url.match(/^\/api\/reports(?:\/([\w-]+))?\/?(?:\?(.*))?$/);
+  if (rm) {
+    try { return await handleReports(req, res, rm[1], new URLSearchParams(rm[2] || '')); }
+    catch { return send(res, 400, { error: 'bad request' }); }
+  }
   const m = req.url.match(/^\/api\/(\w+)(?:\/([\w-]+))?\/?(?:\?.*)?$/);
   if (!m) return serveStatic(req, res);
   const [, col, itemId] = m;

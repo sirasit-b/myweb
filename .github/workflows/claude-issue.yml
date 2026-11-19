@@ -1,22 +1,33 @@
+# Stage 3 of the AI-native SDLC: implement one issue and open a PR.
+# Starts when a maintainer adds the `claude-fix` label, or automatically from claude-triage.yml.
 name: Claude issue fixer
 
 on:
   issues:
     types: [labeled]
+  workflow_dispatch:
+    inputs:
+      issue:
+        description: Issue number to implement
+        required: true
+        type: number
 
 permissions:
   contents: write
   pull-requests: write
   issues: write
+  actions: write   # lets this run start claude-pr-review.yml via `gh workflow run`
   id-token: write
 
 concurrency:
-  group: claude-issue-${{ github.event.issue.number }}
+  group: claude-issue-${{ github.event.issue.number || inputs.issue }}
   cancel-in-progress: false
 
 jobs:
   fix:
-    if: github.event.label.name == 'claude-fix' && github.event.issue.state == 'open'
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.label.name == 'claude-fix' && github.event.issue.state == 'open')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -28,6 +39,11 @@ jobs:
         with:
           node-version: 22
 
+      - name: Git identity
+        run: |
+          git config user.name "claude[bot]"
+          git config user.email "claude[bot]@users.noreply.github.com"
+
       - uses: anthropics/claude-code-action@v1
         env:
           GH_TOKEN: ${{ github.token }}
@@ -36,9 +52,11 @@ jobs:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: |
-            A maintainer added the `claude-fix` label to issue #${{ github.event.issue.number }} in ${{ github.repository }}.
-            Use the issue-fixer subagent to fix it end to end: branch, failing test, fix, `npm test`, PR with `Closes #${{ github.event.issue.number }}`, and a comment on the issue with the test results.
+            Issue #${{ github.event.issue.number || inputs.issue }} in ${{ github.repository }} is approved for implementation.
+            Use the `issue-fixer` subagent to fix it end to end: follow the `<!-- ai-sdlc:plan -->` comment if there is one; branch, failing test, fix, `npm test`, PR with `Closes #<N>` labelled `claude-generated`, and a comment on the issue with the test results.
+            When it returns a PR number, start the review stage: `gh workflow run claude-pr-review.yml -f pr=<PR number>`.
+            If it could not open a PR, add the label `needs-human` to the issue and comment why.
             You are running in GitHub Actions on Linux; use Bash. `gh` is authenticated through GH_TOKEN.
           claude_args: |
-            --max-turns 40
+            --max-turns 50
             --allowedTools "Task,Read,Glob,Grep,Edit,Write,Bash(git:*),Bash(gh:*),Bash(npm:*),Bash(node:*),Bash(mktemp:*),Bash(cat:*),Bash(ls:*)"
