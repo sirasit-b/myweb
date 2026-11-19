@@ -57,6 +57,7 @@ jobs:
           github_token: ${{ github.token }}
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          show_full_output: true  # TEMP: debugging why Claude stops early; remove after
           prompt: |
             You orchestrate the review stage of this repo's AI-native SDLC (see docs/AI-SDLC.md) for PR #${{ github.event.pull_request.number || inputs.pr }} in ${{ github.repository }}.
             The PR branch is checked out. Settings: AUTO_MERGE=${{ vars.AUTO_MERGE || 'false' }}, MAX_FIX_ROUNDS=2.
