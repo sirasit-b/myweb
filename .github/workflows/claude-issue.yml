@@ -53,10 +53,28 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: |
             Issue #${{ github.event.issue.number || inputs.issue }} in ${{ github.repository }} is approved for implementation.
+            If you cannot launch the `issue-fixer` subagent (no subagent tool, or the agent is not found), do not implement it yourself:
+            comment on the issue in Thai that the implementer could not run and why, add the label `needs-human`, and stop.
             Use the `issue-fixer` subagent to fix it end to end: follow the `<!-- ai-sdlc:plan -->` comment if there is one; branch, failing test, fix, `npm test`, PR with `Closes #<N>` labelled `claude-generated`, and a comment on the issue with the test results.
             When it returns a PR number, start the review stage: `gh workflow run claude-pr-review.yml -f pr=<PR number>`.
             If it could not open a PR, add the label `needs-human` to the issue and comment why.
             You are running in GitHub Actions on Linux; use Bash. `gh` is authenticated through GH_TOKEN.
           claude_args: |
             --max-turns 50
-            --allowedTools "Task,Read,Glob,Grep,Edit,Write,Bash(git:*),Bash(gh:*),Bash(npm:*),Bash(node:*),Bash(mktemp:*),Bash(cat:*),Bash(ls:*)"
+            --allowedTools "Agent,Task,Read,Glob,Grep,Edit,Write,Bash(git:*),Bash(gh:*),Bash(npm:*),Bash(node:*),Bash(mktemp:*),Bash(cat:*),Bash(ls:*)"
+
+      # A run that "succeeds" without a PR or a needs-human hand-off is a silent failure: turn it red.
+      - name: Verify a PR was opened
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ github.event.issue.number || inputs.issue }}
+        run: |
+          prs=$(gh pr list -R "$GITHUB_REPOSITORY" --state open --search "\"Closes #$ISSUE\" in:body" --json number --jq 'length')
+          if [ "${prs:-0}" -ge 1 ]; then echo "PR found for issue #$ISSUE."; exit 0; fi
+          if gh issue view "$ISSUE" -R "$GITHUB_REPOSITORY" --json labels --jq '.labels[].name' | grep -qx 'needs-human'; then
+            echo "::error::The implementer handed issue #$ISSUE to a human (see the issue comment)."
+          else
+            echo "::error::Claude finished without opening a PR for issue #$ISSUE."
+          fi
+          exit 1
