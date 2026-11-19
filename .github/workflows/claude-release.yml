@@ -40,6 +40,7 @@ jobs:
           github_token: ${{ github.token }}
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          allowed_bots: "github-actions,github-actions[bot]"  # stages start each other via gh workflow run as this bot
           prompt: |
             IMPORTANT: this is a one-shot, non-interactive run that exits as soon as you end your turn. Run every subagent in the foreground (never set run_in_background) and use its result in this same turn; to run several in parallel, put all the subagent calls in one message. Never end your turn while a subagent is still running, and never say you are "waiting" for one.
             Use the `release-manager` subagent for ${{ github.repository }} with publish=${{ inputs.publish || vars.AUTO_PUBLISH_RELEASE || 'false' }}.
